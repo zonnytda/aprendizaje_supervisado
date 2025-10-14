@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Entrenar Modelos - Egresados UNE{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-robot"></i> Entrenar Modelos de Machine Learning
+</h1>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        
+        <!-- Información del Dataset -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-database"></i> Información del Dataset</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h3 class="text-primary mb-0">{{ dataset_info.total_registros | format_number(0) }}</h3>
+                            <p class="text-muted mb-0">Egresados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-list fa-2x text-success mb-2"></i>
+                            <h3 class="text-success mb-0">{{ dataset_info.total_variables }}</h3>
+                            <p class="text-muted mb-0">Variables</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                            <h3 class="text-warning mb-0">{{ dataset_info.promedio_mean | format_decimal(2) }}</h3>
+                            <p class="text-muted mb-0">Promedio General</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-wave-square fa-2x text-info mb-2"></i>
+                            <h3 class="text-info mb-0">{{ dataset_info.promedio_std | format_decimal(2) }}</h3>
+                            <p class="text-muted mb-0">Desviación Estándar</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Dataset:</strong> {{ dataset_info.nombre }} 
+                    | <strong>Universidad:</strong> {{ dataset_info.universidad }}
+                    | <strong>Periodo:</strong> {{ dataset_info.periodo }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Entrenamiento -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> Configuración de Entrenamiento</h5>
+            </div>
+            <div class="card-body">
+                <form id="trainingForm">
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <strong><i class="fas fa-check-square"></i> Selecciona los modelos a entrenar:</strong>
+                        </label>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary mb-3">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="ridgeCheck" 
+                                                   name="models" value="ridge" checked>
+                                            <label class="form-check-label" for="ridgeCheck">
+                                                <h6 class="mb-2">
+                                                    <i class="fas fa-chart-line text-primary"></i> 
+                                                    <strong>Ridge Regression</strong>
+                                                </h6>
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted mb-0 ms-4">
+                                            Regresión lineal con regularización L2. Reduce el sobreajuste 
+                                            penalizando coeficientes grandes. Ideal cuando todas las 
+                                            variables son relevantes.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-danger mb-3">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="lassoCheck" 
+                                                   name="models" value="lasso" checked>
+                                            <label class="form-check-label" for="lassoCheck">
+                                                <h6 class="mb-2">
+                                                    <i class="fas fa-chart-area text-danger"></i> 
+                                                    <strong>Lasso Regression</strong>
+                                                </h6>
+                                            </label>
+                                        </div>
+                                        <p class="small text-muted mb-0 ms-4">
+                                            Regresión lineal con regularización L1. Realiza selección 
+                                            automática de features eliminando variables poco relevantes. 
+                                            Genera modelos más simples.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock"></i>
+                        <strong>Tiempo estimado:</strong> El entrenamiento completo puede tomar entre 
+                        <strong>5 a 15 minutos</strong> dependiendo de tu hardware. El proceso se ejecutará 
+                        en segundo plano.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg" id="btnTrain">
+                            <i class="fas fa-rocket"></i> Iniciar Entrenamiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Progreso del Entrenamiento -->
+        <div class="card shadow-sm mb-4" id="progressCard">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Entrenamiento en Progreso
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><strong>Estado:</strong> <span id="statusMessage">Iniciando...</span></span>
+                        <span><strong><span id="progressPercent">0</span>%</strong></span>
+                    </div>
+                    <div class="progress progress-custom-height">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                             role="progressbar" 
+                             id="progressBar"
+                             title="Progreso de entrenamiento"
+                             aria-valuenow="0" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            <strong><span id="progressText">0%</span></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Nota:</strong> No cierres esta página ni refresques el navegador mientras 
+                    el entrenamiento está en progreso. El proceso continuará ejecutándose en el servidor.
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultado del Entrenamiento -->
+        <div class="card shadow-sm mb-4" id="resultCard">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle"></i> 
+                    ¡Entrenamiento Completado!
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-trophy"></i> ¡Éxito!</h5>
+                    <p class="mb-0">
+                        Los modelos han sido entrenados y guardados correctamente. 
+                        Ahora puedes ver los resultados y hacer predicciones.
+                    </p>
+                </div>
+
+                <div class="row text-center mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-brain fa-3x text-success mb-2"></i>
+                            <h6>Modelos Entrenados</h6>
+                            <p class="text-muted mb-0" id="modelsTrainedText">Ridge & Lasso</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-images fa-3x text-primary mb-2"></i>
+                            <h6>Visualizaciones</h6>
+                            <p class="text-muted mb-0">Gráficas generadas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('results') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-chart-bar"></i> Ver Resultados y Métricas
+                    </a>
+                    <a href="{{ url_for('predict') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-magic"></i> Hacer Predicciones
+                    </a>
+                    <a href="{{ url_for('visualizations') }}" class="btn btn-info btn-lg">
+                        <i class="fas fa-images"></i> Ver Visualizaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Card -->
+        <div class="card shadow-sm mb-4 border-danger" id="errorCard">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Error en el Entrenamiento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger mb-3">
+                    <h6><i class="fas fa-times-circle"></i> Ocurrió un error</h6>
+                    <p class="mb-0" id="errorMessage">Error desconocido</p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-warning" onclick="location.reload()">
+                        <i class="fas fa-redo"></i> Intentar de Nuevo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-question-circle"></i> ¿Qué hace el entrenamiento?</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-cog text-primary"></i> Proceso de Entrenamiento</h6>
+                        <ol class="small">
+                            <li>Carga y limpieza de datos</li>
+                            <li>Preprocesamiento y transformación</li>
+                            <li>Ingeniería de características</li>
+                            <li>División en conjuntos de entrenamiento/prueba</li>
+                            <li>Entrenamiento de modelos seleccionados</li>
+                            <li>Evaluación y comparación de métricas</li>
+                            <li>Generación de visualizaciones</li>
+                            <li>Guardado de modelos y resultados</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-line text-success"></i> Resultados Generados</h6>
+                        <ul class="small">
+                            <li><strong>Modelos entrenados:</strong> Archivos .pkl listos para predicción</li>
+                            <li><strong>Métricas:</strong> RMSE, MAE, R², MAPE</li>
+                            <li><strong>Visualizaciones:</strong> Gráficas de rendimiento y análisis</li>
+                            <li><strong>Comparaciones:</strong> Tabla comparativa entre modelos</li>
+                            <li><strong>Feature Importance:</strong> Variables más influyentes</li>
+                        </ul>
+                        
+                        <div class="alert alert-light border mt-3 mb-0">
+                            <small>
+                                <i class="fas fa-lightbulb text-warning"></i>
+                                <strong>Tip:</strong> El mejor modelo se selecciona automáticamente 
+                                basándose en las métricas de evaluación.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let progressInterval = null;
+
+// Manejar envío del formulario
+document.getElementById('trainingForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Obtener modelos seleccionados
+    const checkboxes = document.querySelectorAll('input[name="models"]:checked');
+    const selectedModels = Array.from(checkboxes).map(cb => cb.value);
+    
+    // Validar que al menos un modelo esté seleccionado
+    if (selectedModels.length === 0) {
+        alert('⚠️ Por favor, selecciona al menos un modelo para entrenar.');
+        return;
+    }
+    
+    // Ocultar cards anteriores
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('errorCard').style.display = 'none';
+    
+    // Mostrar card de progreso
+    document.getElementById('progressCard').style.display = 'block';
+    
+    // Deshabilitar botón de entrenamiento
+    const btnTrain = document.getElementById('btnTrain');
+    btnTrain.disabled = true;
+    btnTrain.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrenando...';
+    
+    // Scroll al card de progreso
+    document.getElementById('progressCard').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+    });
+    
+    try {
+        // Iniciar entrenamiento
+        const response = await fetch('/api/train', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                models: selectedModels
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('Entrenamiento iniciado:', result);
+            
+            // Actualizar mensaje inicial
+            document.getElementById('statusMessage').textContent = 'Entrenamiento iniciado...';
+            
+            // Iniciar polling para actualizar el progreso
+            startProgressPolling();
+            
+        } else {
+            throw new Error(result.error || 'Error desconocido');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showError(error.message);
+        
+        // Rehabilitar botón
+        btnTrain.disabled = false;
+        btnTrain.innerHTML = '<i class="fas fa-rocket"></i> Iniciar Entrenamiento';
+    }
+});
+
+// Función para hacer polling del progreso
+function startProgressPolling() {
+    // Limpiar intervalo anterior si existe
+    if (progressInterval) {
+        clearInterval(progressInterval);
+    }
+    
+    // Hacer polling cada 2 segundos
+    progressInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/training-status');
+            const status = await response.json();
+            
+            console.log('Estado del entrenamiento:', status);
+            
+            // Actualizar UI con el progreso
+            updateProgress(status);
+            
+            // Si el entrenamiento terminó (completado o error)
+            if (!status.running) {
+                clearInterval(progressInterval);
+                
+                if (status.completed) {
+                    showSuccess(status);
+                } else if (status.error) {
+                    showError(status.error);
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error obteniendo estado:', error);
+        }
+    }, 2000); // Cada 2 segundos
+}
+
+// Actualizar barra de progreso
+function updateProgress(status) {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    const progress = Math.round(status.progress || 0);
+    
+    progressBar.style.width = progress + '%';
+    progressBar.setAttribute('aria-valuenow', progress);
+    progressText.textContent = progress + '%';
+    progressPercent.textContent = progress;
+    statusMessage.textContent = status.message || 'Procesando...';
+    
+    // Cambiar color según el progreso
+    progressBar.classList.remove('bg-info', 'bg-warning', 'bg-success');
+    if (progress < 30) {
+        progressBar.classList.add('bg-info');
+    } else if (progress < 70) {
+        progressBar.classList.add('bg-warning');
+    } else {
+        progressBar.classList.add('bg-success');
+    }
+}
+
+// Mostrar resultado exitoso
+function showSuccess(status) {
+    document.getElementById('progressCard').style.display = 'none';
+    document.getElementById('resultCard').style.display = 'block';
+    
+    // Scroll al resultado
+    document.getElementById('resultCard').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+    });
+    
+    // Rehabilitar botón
+    const btnTrain = document.getElementById('btnTrain');
+    btnTrain.disabled = false;
+    btnTrain.innerHTML = '<i class="fas fa-rocket"></i> Iniciar Entrenamiento';
+    
+    // Confetti effect (opcional)
+    if (typeof confetti !== 'undefined') {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+}
+
+// Mostrar error
+function showError(errorMessage) {
+    document.getElementById('progressCard').style.display = 'none';
+    document.getElementById('errorCard').style.display = 'block';
+    document.getElementById('errorMessage').textContent = errorMessage;
+    
+    // Scroll al error
+    document.getElementById('errorCard').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+    });
+    
+    // Rehabilitar botón
+    const btnTrain = document.getElementById('btnTrain');
+    btnTrain.disabled = false;
+    btnTrain.innerHTML = '<i class="fas fa-rocket"></i> Iniciar Entrenamiento';
+}
+
+// Limpiar intervalo al salir de la página
+window.addEventListener('beforeunload', function() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}EDA - Sistema de Predicción UNE{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">
+            <i class="fas fa-chart-bar text-primary"></i> Análisis Exploratorio de Datos (EDA)
+        </h1>
+        <p class="lead text-muted">Exploración estadística del dataset de egresados</p>
+    </div>
+</div>
+
+<!-- Estadísticas Generales -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Estadísticas del Promedio Final
+            </div>
+            <div class="card-body">
+                {% if stats and stats.promedio_stats %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <td><strong>Total Registros:</strong></td>
+                        <td class="text-end">{{ "{:,}".format(stats.total_registros) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Media:</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats.mean) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desviación Std:</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats.std) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mínimo:</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats.min) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>25% (Q1):</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats['25%']) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mediana (50%):</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats['50%']) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>75% (Q3):</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats['75%']) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Máximo:</strong></td>
+                        <td class="text-end">{{ "%.2f"|format(stats.promedio_stats.max) }}</td>
+                    </tr>
+                </table>
+                {% else %}
+                <p class="text-muted">No hay estadísticas disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-link"></i> Correlaciones con Promedio Final
+            </div>
+            <div class="card-body card-body-scroll">
+                {% if correlations %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th class="text-end">Correlación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for var, corr in correlations.items() %}
+                        <tr>
+                            <td>{{ var }}</td>
+                            <td class="text-end">
+                                <span class="badge {% if corr > 0.5 %}bg-success{% elif corr > 0 %}bg-info{% elif corr > -0.5 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ "%.3f"|format(corr) }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No hay correlaciones disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Distribuciones por Categorías -->
+<div class="row">
+    {% if stats.facultad_counts %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-university"></i> Distribución por Facultad
+            </div>
+            <div class="card-body card-body-scroll">
+                <table class="table table-sm">
+                    {% for facultad, count in stats.facultad_counts.items() %}
+                    <tr>
+                        <td>{{ facultad }}</td>
+                        <td class="text-end">
+                            <span class="badge bg-primary">{{ "{:,}".format(count) }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if stats.nivel_academico_counts %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-graduation-cap"></i> Distribución por Nivel Académico
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    {% for nivel, count in stats.nivel_academico_counts.items() %}
+                    <tr>
+                        <td>{{ nivel }}</td>
+                        <td class="text-end">
+                            <span class="badge bg-success">{{ "{:,}".format(count) }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if stats.sede_counts %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-map-marker-alt"></i> Distribución por Sede
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    {% for sede, count in stats.sede_counts.items() %}
+                    <tr>
+                        <td>{{ sede }}</td>
+                        <td class="text-end">
+                            <span class="badge bg-info">{{ "{:,}".format(count) }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if stats.sexo_counts %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-venus-mars"></i> Distribución por Sexo
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    {% for sexo, count in stats.sexo_counts.items() %}
+                    <tr>
+                        <td>{{ sexo }}</td>
+                        <td class="text-end">
+                            <span class="badge bg-warning">{{ "{:,}".format(count) }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Información Adicional -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-lightbulb"></i> Insights del Análisis
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="text-primary"><i class="fas fa-check-circle"></i> Calidad de Datos</h5>
+                        <p>El dataset contiene <strong>{{ "{:,}".format(stats.total_registros) }} registros</strong> de egresados entre {{ dataset_info.periodo }}.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="text-success"><i class="fas fa-chart-area"></i> Distribución</h5>
+                        <p>El promedio general es <strong>{{ "%.2f"|format(stats.promedio_stats.mean) }}</strong> con una desviación estándar de <strong>{{ "%.2f"|format(stats.promedio_stats.std) }}</strong>.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="text-info"><i class="fas fa-database"></i> Variables</h5>
+                        <p>El análisis incluye variables demográficas, académicas y temporales para predecir el promedio final.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

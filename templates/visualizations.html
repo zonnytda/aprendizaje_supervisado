@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+
+{% block title %}Visualizaciones - Egresados UNE{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/visualizations.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-chart-area"></i> Visualizaciones y Análisis Gráfico
+</h1>
+
+{% if not figures_available %}
+<div class="alert alert-warning" role="alert">
+    <h5 class="alert-heading">
+        <i class="fas fa-exclamation-triangle"></i> No hay visualizaciones disponibles
+    </h5>
+    <p>Las gráficas se generan durante el entrenamiento de los modelos. Para ver las visualizaciones:</p>
+    <hr>
+    <ol>
+        <li>Ve a la sección <strong>Entrenar</strong></li>
+        <li>Entrena los modelos (Ridge y/o Lasso)</li>
+        <li>Espera a que complete el proceso</li>
+        <li>Regresa aquí para ver todas las visualizaciones</li>
+    </ol>
+    <a href="{{ url_for('train') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-robot"></i> Entrenar Modelos
+    </a>
+</div>
+{% else %}
+
+<!-- Navegación de Pestañas -->
+<ul class="nav nav-tabs mb-4" id="visualizationTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" 
+                data-bs-target="#general" type="button" role="tab">
+            <i class="fas fa-chart-bar"></i> General
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ridge-tab" data-bs-toggle="tab" 
+                data-bs-target="#ridge" type="button" role="tab">
+            <i class="fas fa-chart-line text-primary"></i> Ridge
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="lasso-tab" data-bs-toggle="tab" 
+                data-bs-target="#lasso" type="button" role="tab">
+            <i class="fas fa-chart-area text-danger"></i> Lasso
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" 
+                data-bs-target="#comparison" type="button" role="tab">
+            <i class="fas fa-balance-scale text-success"></i> Comparación
+        </button>
+    </li>
+</ul>
+
+<!-- Contenido de las Pestañas -->
+<div class="tab-content" id="visualizationTabsContent">
+    
+    <!-- TAB: GENERAL -->
+    <div class="tab-pane fade show active" id="general" role="tabpanel">
+        <div class="row g-4">
+            
+            {% if figures.correlation_matrix %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-th"></i> Matriz de Correlación de Variables
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='correlation_matrix.png') }}" 
+                             class="img-fluid rounded img-zoomable img-max-600" 
+                             alt="Matriz de Correlación">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i> 
+                                <small>
+                                    Muestra la relación lineal entre las variables. 
+                                    Valores cercanos a <strong>1</strong> indican correlación positiva fuerte.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.target_distribution %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Distribución del Promedio Final
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='target_distribution.png') }}" 
+                             class="img-fluid rounded img-zoomable" 
+                             alt="Distribución del Promedio">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Histograma que muestra cómo se distribuyen los promedios finales</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.boxplot_facultad %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-box"></i> Promedios por Facultad
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='boxplot_facultad.png') }}" 
+                             class="img-fluid rounded img-zoomable" 
+                             alt="Box Plot por Facultad">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Comparación de distribución de promedios entre facultades</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- TAB: RIDGE -->
+    <div class="tab-pane fade" id="ridge" role="tabpanel">
+        <div class="row g-4">
+            
+            {% if figures.ridge_pred_vs_actual %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bullseye"></i> Predicciones vs Valores Reales
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='ridge_predicted_vs_actual.png') }}" 
+                             class="img-fluid rounded border img-zoomable" 
+                             alt="Ridge - Predicted vs Actual">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>
+                                    Los puntos cerca de la <strong>línea diagonal</strong> indican predicciones precisas.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.ridge_residuals %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-wave-square"></i> Análisis de Residuales
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='ridge_residuals_plot.png') }}" 
+                             class="img-fluid rounded border img-zoomable" 
+                             alt="Ridge - Residuals">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>
+                                    Los residuales deben distribuirse <strong>aleatoriamente alrededor de cero</strong>.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.ridge_importance %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star"></i> Importancia de Características (Top 20)
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='ridge_feature_importance.png') }}" 
+                             class="img-fluid rounded border img-zoomable img-max-600" 
+                             alt="Ridge - Feature Importance">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>
+                                    Variables con <strong>mayor impacto</strong> en la predicción del promedio final.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.ridge_learning %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-graduation-cap"></i> Curva de Aprendizaje
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='ridge_learning_curve.png') }}" 
+                             class="img-fluid rounded border img-zoomable img-max-500" 
+                             alt="Ridge - Learning Curve">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>
+                                    Muestra cómo <strong>mejora el modelo</strong> con más datos de entrenamiento.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- TAB: LASSO -->
+    <div class="tab-pane fade" id="lasso" role="tabpanel">
+        <div class="row g-4">
+            
+            {% if figures.lasso_pred_vs_actual %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bullseye"></i> Predicciones vs Valores Reales
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='lasso_predicted_vs_actual.png') }}" 
+                             class="img-fluid rounded border img-zoomable" 
+                             alt="Lasso - Predicted vs Actual">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Dispersión entre valores predichos y valores reales del modelo Lasso</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.lasso_residuals %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 card-animated">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-wave-square"></i> Análisis de Residuales
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='lasso_residuals_plot.png') }}" 
+                             class="img-fluid rounded border img-zoomable" 
+                             alt="Lasso - Residuals">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Distribución de errores del modelo Lasso</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.lasso_importance %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star"></i> Importancia de Características (Top 20)
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='lasso_feature_importance.png') }}" 
+                             class="img-fluid rounded border img-zoomable img-max-600" 
+                             alt="Lasso - Feature Importance">
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-magic"></i> 
+                            <strong>Ventaja de Lasso:</strong> 
+                            Realiza <strong>selección automática de features</strong>, eliminando las menos relevantes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if figures.lasso_learning %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-graduation-cap"></i> Curva de Aprendizaje
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='lasso_learning_curve.png') }}" 
+                             class="img-fluid rounded border img-zoomable img-max-500" 
+                             alt="Lasso - Learning Curve">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Evolución del rendimiento del modelo Lasso</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- TAB: COMPARACIÓN -->
+    <div class="tab-pane fade" id="comparison" role="tabpanel">
+        <div class="row g-4">
+            
+            {% if figures.comparison %}
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-balance-scale"></i> Comparación Ridge vs Lasso
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('serve_figure', filename='model_comparison.png') }}" 
+                             class="img-fluid rounded img-zoomable img-max-600" 
+                             alt="Model Comparison">
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <small>
+                                    Comparación visual de las <strong>métricas de rendimiento</strong> entre ambos modelos.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabla de Métricas -->
+            <div class="col-12">
+                <div class="card shadow-sm card-animated">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table"></i> Resumen de Métricas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if metrics %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-metrics">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-robot"></i> Modelo</th>
+                                        <th class="text-center">
+                                            RMSE 
+                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
+                                               title="Root Mean Square Error - Menor es mejor"></i>
+                                        </th>
+                                        <th class="text-center">
+                                            MAE
+                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
+                                               title="Mean Absolute Error - Menor es mejor"></i>
+                                        </th>
+                                        <th class="text-center">
+                                            R²
+                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
+                                               title="Coeficiente de Determinación - Mayor es mejor (0-1)"></i>
+                                        </th>
+                                        <th class="text-center">Mejor en</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for model_name, model_metrics in metrics.items() %}
+                                    <tr>
+                                        <td><strong>{{ model_name }}</strong></td>
+                                        <td class="text-center">
+                                            <span class="badge badge-metric bg-{% if model_metrics.best_rmse %}success{% else %}secondary{% endif %}">
+                                                {{ model_metrics.RMSE | format_decimal(4) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-metric bg-secondary">
+                                                {{ model_metrics.MAE | format_decimal(4) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-metric bg-{% if model_metrics.best_r2 %}primary{% else %}secondary{% endif %}">
+                                                {{ model_metrics.R2 | format_decimal(4) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if model_metrics.best_rmse %}
+                                            <span class="badge bg-success">RMSE</span>
+                                            {% endif %}
+                                            {% if model_metrics.best_r2 %}
+                                            <span class="badge bg-primary">R²</span>
+                                            {% endif %}
+                                            {% if not model_metrics.best_rmse and not model_metrics.best_r2 %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted mb-0">
+                            <i class="fas fa-info-circle"></i> No hay métricas de comparación disponibles
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interpretación -->
+            <div class="col-12">
+                <div class="card shadow-sm border-info card-animated">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb"></i> Interpretación de Gráficas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="interpretationAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseOne" aria-expanded="true">
+                                        <i class="fas fa-bullseye text-primary me-2"></i>
+                                        Predicciones vs Valores Reales
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show" 
+                                     data-bs-parent="#interpretationAccordion">
+                                    <div class="accordion-body">
+                                        <p>
+                                            Este gráfico compara los valores <strong>predichos por el modelo</strong> 
+                                            con los <strong>valores reales</strong> del dataset de prueba.
+                                        </p>
+                                        <ul class="mb-0">
+                                            <li>Los puntos cerca de la <strong>línea diagonal</strong> indican predicciones precisas</li>
+                                            <li>Una mayor <strong>dispersión</strong> indica menor precisión del modelo</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" 
+                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                        <i class="fas fa-wave-square text-danger me-2"></i>
+                                        Análisis de Residuales
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" 
+                                     data-bs-parent="#interpretationAccordion">
+                                    <div class="accordion-body">
+                                        <p>
+                                            Los <strong>residuales</strong> son las diferencias entre los valores predichos 
+                                            y los valores reales.
+                                        </p>
+                                        <ul class="mb-0">
+                                            <li>Deben distribuirse <strong>aleatoriamente alrededor de cero</strong></li>
+                                            <li>No debe haber patrones claros o sistemáticos</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" 
+                                            data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                        <i class="fas fa-star text-success me-2"></i>
+                                        Importancia de Características
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" 
+                                     data-bs-parent="#interpretationAccordion">
+                                    <div class="accordion-body">
+                                        <p>
+                                            Muestra qué <strong>variables tienen mayor impacto</strong> en las predicciones.
+                                        </p>
+                                        <ul class="mb-0">
+                                            <li>Valores más <strong>altos</strong> indican mayor influencia</li>
+                                            <li>Ayuda a identificar los factores clave del rendimiento académico</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Botones de Acción -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('download_results') }}" class="btn btn-success btn-lg me-2">
+            <i class="fas fa-download"></i> Descargar Todas las Gráficas (ZIP)
+        </a>
+        <a href="{{ url_for('results') }}" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-chart-bar"></i> Ver Resultados Detallados
+        </a>
+        <a href="{{ url_for('predict') }}" class="btn btn-info btn-lg">
+            <i class="fas fa-magic"></i> Hacer Predicción
+        </a>
+    </div>
+</div>
+
+{% endif %}
+
+<!-- Modal para Zoom de Imágenes -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Vista Ampliada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="Zoom">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inicializar tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Zoom en imágenes al hacer click
+document.querySelectorAll('.img-zoomable').forEach(img => {
+    img.addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        document.getElementById('modalImage').src = this.src;
+        document.getElementById('imageModalLabel').textContent = this.alt;
+        modal.show();
+    });
+});
+
+// Animación de entrada para las tarjetas
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card-animated');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform ='translateY(0)';
+        }, index * 50);
+    });
+});
+
+// Mejorar la navegación entre tabs
+document.querySelectorAll('#visualizationTabs button').forEach(button => {
+    button.addEventListener('shown.bs.tab', function (event) {
+        // Scroll suave al contenido del tab
+        const targetId = event.target.getAttribute('data-bs-target');
+        const targetElement = document.querySelector(targetId);
+        
+        setTimeout(() => {
+            targetElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+/**
+ * Estilos para la página de visualizaciones
+ * Proyecto: Egresados UNE
+ */
+
+/* Imágenes con zoom */
+.img-zoomable {
+    cursor: pointer;
+    max-height: 600px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.img-zoomable:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Altura máxima para imágenes grandes */
+.img-max-500 {
+    max-height: 500px;
+}
+
+.img-max-600 {
+    max-height: 600px;
+}
+
+/* Animación de fade-in */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Tabs de navegación */
+.nav-tabs .nav-link {
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: bold;
+}
+
+/* Accordion */
+.accordion-button:not(.collapsed) {
+    background-color: #e7f3ff;
+    color: #0d6efd;
+}
+
+/* Modal para zoom */
+.modal-xl {
+    max-width: 95%;
+}
+
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .img-zoomable {
+        max-height: 400px;
+    }
+}
+
+/* Cards con altura consistente */
+.card.h-100 {
+    height: 100%;
+}
+
+/* Tooltips y badges */
+.badge-metric {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Estilos para la tabla de métricas */
+.table-metrics {
+    font-size: 0.95rem;
+}
+
+.table-metrics th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table-metrics td {
+    vertical-align: middle;
+}
+
+/* Contenedor de pestañas */
+.tab-content {
+    padding-top: 1rem;
+}
+
+/* Animación de entrada para cards */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-animated {
+    animation: slideInUp 0.5s ease-out;
+}
+
+/* Responsive para imágenes */
+@media (max-width: 576px) {
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+}

@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados - Egresados UNE{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-trophy"></i> Resultados y Comparación de Modelos
+</h1>
+
+{% if not results %}
+<div class="alert alert-warning" role="alert">
+    <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> No hay resultados disponibles</h5>
+    <p>Aún no se han entrenado los modelos. Para entrenar:</p>
+    <hr>
+    <ol>
+        <li>Ve a la sección <strong>Entrenar</strong></li>
+        <li>Haz clic en el botón <strong>"Entrenar Modelos"</strong></li>
+        <li>Espera a que complete (5-15 minutos)</li>
+        <li>Los resultados aparecerán automáticamente aquí</li>
+    </ol>
+    <a href="{{ url_for('train') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-robot"></i> Ir a Entrenar Modelos
+    </a>
+</div>
+{% else %}
+
+<!-- Comparación de Métricas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-balance-scale"></i> Comparación de Métricas - Ridge vs Lasso</h5>
+            </div>
+            <div class="card-body">
+                {% if results.comparison %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Modelo</th>
+                                <th>RMSE <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Root Mean Squared Error - Menor es mejor"></i></th>
+                                <th>MAE <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Mean Absolute Error - Menor es mejor"></i></th>
+                                <th>R² <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Coeficiente de Determinación - Mayor es mejor"></i></th>
+                                <th>Ranking</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model in results.comparison %}
+                            <tr {% if loop.index == 1 %}class="table-success"{% endif %}>
+                                <td>
+                                    <strong>{{ model.Model }}</strong>
+                                    {% if loop.index == 1 %}
+                                    <span class="badge bg-success ms-2">Mejor Modelo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if model.RMSE < 0.9 %}success{% elif model.RMSE < 1.2 %}warning{% else %}danger{% endif %}">
+                                        {{ model.RMSE | format_decimal(4) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if model.MAE < 0.7 %}success{% elif model.MAE < 1.0 %}warning{% else %}danger{% endif %}">
+                                        {{ model.MAE | format_decimal(4) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if model.R2 > 0.7 %}success{% elif model.R2 > 0.5 %}warning{% else %}danger{% endif %}">
+                                        {{ model.R2 | format_decimal(4) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    #{{ loop.index }}
+                                    {% if loop.index == 1 %}
+                                    <i class="fas fa-trophy text-warning"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Mejor RMSE</h6>
+                                <h3 class="text-success">{{ results.comparison[0].Model }}</h3>
+                                <p class="mb-0">{{ results.comparison[0].RMSE | format_decimal(4) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Mejor R²</h6>
+                                <h3 class="text-primary">
+                                    {% set best_r2 = results.comparison | sort(attribute='R2', reverse=True) | first %}
+                                    {{ best_r2.Model }}
+                                </h3>
+                                <p class="mb-0">{{ best_r2.R2 | format_decimal(4) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Mejor MAE</h6>
+                                <h3 class="text-warning">
+                                    {% set best_mae = results.comparison | sort(attribute='MAE') | first %}
+                                    {{ best_mae.Model }}
+                                </h3>
+                                <p class="mb-0">{{ best_mae.MAE | format_decimal(4) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No hay datos de comparación disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfica de Comparación -->
+{% if figures.comparison %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Comparación Visual de Métricas</h5>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ url_for('serve_figure', filename='model_comparison.png') }}" 
+                     class="img-fluid rounded model-comparison-img" 
+                     alt="Comparación de Modelos">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Ridge Regression - Resultados Detallados -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Ridge Regression - Resultados Detallados</h5>
+            </div>
+            <div class="card-body">
+                {% if results.ridge_metrics %}
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-primary">{{ results.ridge_metrics.metrics.RMSE | format_decimal(4) }}</h2>
+                            <p class="text-muted">RMSE</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-success">{{ results.ridge_metrics.metrics.MAE | format_decimal(4) }}</h2>
+                            <p class="text-muted">MAE</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-warning">{{ results.ridge_metrics.metrics.R2 | format_decimal(4) }}</h2>
+                            <p class="text-muted">R²</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-info">{{ results.ridge_metrics.metrics.MAPE | format_decimal(2) }}%</h2>
+                            <p class="text-muted">MAPE</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    {% if figures.ridge_pred_vs_actual %}
+                    <div class="col-md-6 mb-3">
+                        <h6>Predicciones vs Valores Reales</h6>
+                        <img src="{{ url_for('serve_figure', filename='ridge_predicted_vs_actual.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Ridge - Predicted vs Actual">
+                    </div>
+                    {% endif %}
+                    
+                    {% if figures.ridge_residuals %}
+                    <div class="col-md-6 mb-3">
+                        <h6>Análisis de Residuales</h6>
+                        <img src="{{ url_for('serve_figure', filename='ridge_residuals_plot.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Ridge - Residuals">
+                    </div>
+                    {% endif %}
+                    
+                    {% if figures.ridge_importance %}
+                    <div class="col-12 mb-3">
+                        <h6>Feature Importance (Top 20)</h6>
+                        <img src="{{ url_for('serve_figure', filename='ridge_feature_importance.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Ridge - Feature Importance">
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No hay métricas detalladas de Ridge disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lasso Regression - Resultados Detallados -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Lasso Regression - Resultados Detallados</h5>
+            </div>
+            <div class="card-body">
+                {% if results.lasso_metrics %}
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-primary">{{ results.lasso_metrics.metrics.RMSE | format_decimal(4) }}</h2>
+                            <p class="text-muted">RMSE</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-success">{{ results.lasso_metrics.metrics.MAE | format_decimal(4) }}</h2>
+                            <p class="text-muted">MAE</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-warning">{{ results.lasso_metrics.metrics.R2 | format_decimal(4) }}</h2>
+                            <p class="text-muted">R²</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h2 class="text-info">{{ results.lasso_metrics.metrics.MAPE | format_decimal(2) }}%</h2>
+                            <p class="text-muted">MAPE</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-magic"></i> Ventaja de Lasso:</strong> 
+                    Realiza selección automática de features, reduciendo la complejidad del modelo.
+                </div>
+                
+                <div class="row">
+                    {% if figures.lasso_pred_vs_actual %}
+                    <div class="col-md-6 mb-3">
+                        <h6>Predicciones vs Valores Reales</h6>
+                        <img src="{{ url_for('serve_figure', filename='lasso_predicted_vs_actual.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Lasso - Predicted vs Actual">
+                    </div>
+                    {% endif %}
+                    
+                    {% if figures.lasso_residuals %}
+                    <div class="col-md-6 mb-3">
+                        <h6>Análisis de Residuales</h6>
+                        <img src="{{ url_for('serve_figure', filename='lasso_residuals_plot.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Lasso - Residuals">
+                    </div>
+                    {% endif %}
+                    
+                    {% if figures.lasso_importance %}
+                    <div class="col-12 mb-3">
+                        <h6>Feature Importance (Top 20)</h6>
+                        <img src="{{ url_for('serve_figure', filename='lasso_feature_importance.png') }}" 
+                             class="img-fluid rounded border" 
+                             alt="Lasso - Feature Importance">
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No hay métricas detalladas de Lasso disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interpretación y Conclusiones -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Interpretación y Conclusiones</h5>
+            </div>
+            <div class="card-body">
+                <h6>📊 Análisis de Resultados</h6>
+                {% if results.comparison %}
+                {% set best = results.comparison[0] %}
+                <p>
+                    El modelo <strong>{{ best.Model }}</strong> obtuvo el mejor rendimiento con:
+                </p>
+                <ul>
+                    <li><strong>RMSE:</strong> {{ best.RMSE | format_decimal(4) }} puntos - Error promedio de {{ best.RMSE | format_decimal(2) }} en la predicción.</li>
+                    <li><strong>MAE:</strong> {{ best.MAE | format_decimal(4) }} puntos - Las predicciones se desvían {{ best.MAE | format_decimal(2) }} puntos en promedio.</li>
+                    <li><strong>R²:</strong> {{ best.R2 | format_decimal(4) }} - El modelo explica {{ (best.R2 * 100) | format_decimal(1) }}% de la variabilidad.</li>
+                </ul>
+                
+                <h6 class="mt-4">🎯 Aplicabilidad Práctica</h6>
+                <p>
+                    {% if best.R2 > 0.7 %}
+                    Con un R² de {{ (best.R2 * 100) | format_decimal(1) }}%, el modelo tiene <strong>buen poder predictivo</strong> y puede usarse para:
+                    {% elif best.R2 > 0.5 %}
+                    Con un R² de {{ (best.R2 * 100) | format_decimal(1) }}%, el modelo tiene <strong>poder predictivo moderado</strong> y puede usarse para:
+                    {% else %}
+                    Con un R² de {{ (best.R2 * 100) | format_decimal(1) }}%, el modelo puede ser útil para:
+                    {% endif %}
+                </p>
+                <ul>
+                    <li>Estimar el rendimiento académico esperado de nuevos estudiantes</li>
+                    <li>Identificar factores que influyen en el desempeño académico</li>
+                    <li>Apoyar la toma de decisiones en políticas educativas</li>
+                    <li>Detectar estudiantes que podrían necesitar apoyo adicional</li>
+                </ul>
+                
+                <h6 class="mt-4">🔄 Mejoras Futuras</h6>
+                <ul class="mb-0">
+                    <li>Incorporar más variables predictoras (asistencia, participación)</li>
+                    <li>Explorar modelos más complejos (Random Forest, Gradient Boosting)</li>
+                    <li>Implementar técnicas de ensemble para mejorar la precisión</li>
+                    <li>Realizar análisis de interacciones entre variables</li>
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Entrena los modelos para ver el análisis completo.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('visualizations') }}" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-images"></i> Ver Todas las Visualizaciones
+        </a>
+        <a href="{{ url_for('predict') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-magic"></i> Hacer Predicción
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inicializar tooltips de Bootstrap
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Animación de entrada para las tarjetas
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{
+  "project": "Sistema de Predicción de Promedio Final - Egresados UNE",
+  "version": "1.0.0",
+  "execution_date": "2025-10-14 04:22:17",
+  "execution_time_seconds": 9.121290922164917,
+  "quick_mode": false,
+  "dataset": {
+    "total_samples": 9898,
+    "train_samples": 6514,
+    "val_samples": 1397,
+    "test_samples": 1397,
+    "n_features_original": 12,
+    "n_features_engineered": 80
+  },
+  "preprocessing": {
+    "initial_shape": [
+      9898,
+      17
+    ],
+    "final_shape": [
+      9308,
+      17
+    ],
+    "rows_lost": 590,
+    "rows_lost_pct": 5.960800161648818,
+    "cols_lost": 0,
+    "numeric_features": 4,
+    "categorical_features": 8,
+    "target_column": "PROMEDIO_FINAL",
+    "processing_steps": 5,
+    "processing_log": [
+      {
+        "action": "Inicialización",
+        "details": "Shape: (9898, 17)",
+        "shape": [
+          9898,
+          17
+        ]
+      },
+      {
+        "action": "Feature identification",
+        "details": "Numeric: 4, Categorical: 8",
+        "shape": [
+          9898,
+          17
+        ]
+      },
+      {
+        "action": "Outliers removed",
+        "details": "Method: iqr, Rows removed: 590",
+        "shape": [
+          9898,
+          17
+        ]
+      },
+      {
+        "action": "Data types converted",
+        "details": "Conversions: 8",
+        "shape": [
+          9898,
+          17
+        ]
+      },
+      {
+        "action": "Data split",
+        "details": "Train: 6514, Val: 1397, Test: 1397",
+        "shape": [
+          9898,
+          17
+        ]
+      }
+    ]
+  },
+  "feature_engineering": {
+    "derived_features": 7,
+    "feature_names": [
+      "ANNIO_EGRESO",
+      "CREDITOS_ACUMULADOS",
+      "ANNIO_MATRICULA1",
+      "ANNIO_SOLICITUD_TRAMITE",
+      "DURACION_ESTUDIOS",
+      "ANNIO_EGRESO_NORM",
+      "CREDITOS_POR_ANNIO",
+      "ES_POSTGRADO",
+      "SEXO_BIN",
+      "TIEMPO_TRAMITE",
+      "ES_REGULAR",
+      "NIVEL_ACADEMICO_PREGRADO",
+      "NIVEL_ACADEMICO_SEGUNDA ESPECIALIDAD",
+      "FACULTAD_CIENCIAS",
+      "FACULTAD_CIENCIAS EMPRESARIALES",
+      "FACULTAD_CIENCIAS SOCIALES Y HUMANIDADES",
+      "FACULTAD_EDUCACIÓN INICIAL",
+      "FACULTAD_ESCUELA DE POSGRADO WÁLTER PEÑALOZA RAMELLA",
+      "FACULTAD_PEDAGOGÍA Y CULTURA FÍSICA",
+      "FACULTAD_TECNOLOGÍA"
+    ]
+  },
+  "models": [
+    "ridge",
+    "lasso"
+  ],
+  "best_model": "LASSO",
+  "metrics": {
+    "ridge": {
+      "RMSE": 0.6788720825758586,
+      "MAE": 0.527848349944741,
+      "R2": 0.6345048598270127,
+      "MAPE": 3.3442973883783154,
+      "MSE": 0.4608673045008834,
+      "Max_Error": 4.073228437469162,
+      "Mean_Residual": -0.012097759256899775,
+      "Std_Residual": 0.6787642806761752
+    },
+    "lasso": {
+      "RMSE": 0.6785882232314323,
+      "MAE": 0.5275039102033386,
+      "R2": 0.6348104476483958,
+      "MAPE": 3.3421966598106296,
+      "MSE": 0.4604819767083922,
+      "Max_Error": 4.068414227413051,
+      "Mean_Residual": -0.011620336745186373,
+      "Std_Residual": 0.6784887209691262
+    }
+  }
+}
