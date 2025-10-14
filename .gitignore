@@ -1,4 +1,6 @@
-# Python
+# ========================================
+# PYTHON
+# ========================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -16,63 +18,149 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual Environment
+# ========================================
+# VIRTUAL ENVIRONMENT
+# ========================================
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
+.venv/
 
-# Data Files
-data/raw/*.csv
-data/raw/*.xlsx
+# ========================================
+# DATA FILES
+# ========================================
+# Permitir CSVs en src/utils/data/raw/
+# Ignorar CSVs procesados y features
+src/utils/data/processed/*.csv
+src/utils/data/features/*.csv
+src/utils/data/processed/*.xlsx
+src/utils/data/features/*.xlsx
+
+# Si tienes carpeta data/ en la raíz (opcional)
 data/processed/*.csv
 data/features/*.csv
-*.csv
-*.xlsx
 
-# Models
+# ========================================
+# MODELS
+# ========================================
+src/utils/data/models/*.pkl
+src/utils/data/models/*.joblib
+src/utils/data/models/*.h5
 models/*.pkl
 models/*.joblib
 models/*.h5
 
-# Results
+# ========================================
+# RESULTS
+# ========================================
 results/figures/*.png
 results/figures/*.jpg
+results/figures/*.jpeg
+results/figures/*.svg
 results/metrics/*.csv
 results/metrics/*.json
+results/metrics/*.txt
 
-# IDE
+# ========================================
+# IDE / EDITORS
+# ========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
+.settings/
 
-# OS
+# ========================================
+# OPERATING SYSTEM
+# ========================================
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+
+# Windows
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Jupyter Notebook
+# Linux
+*~
+
+# ========================================
+# JUPYTER NOTEBOOK
+# ========================================
 .ipynb_checkpoints/
-*.ipynb
+*/.ipynb_checkpoints/*
 
-# Flask
+# ========================================
+# FLASK
+# ========================================
 instance/
 .webassets-cache
+*.db
+*.sqlite
+*.sqlite3
 
-# Environment variables
+# ========================================
+# ENVIRONMENT VARIABLES
+# ========================================
 .env
 .env.local
+.env.*.local
+.flaskenv
 
-# Logs
+# ========================================
+# LOGS
+# ========================================
 *.log
+logs/
+*.log.*
+
+# ========================================
+# TESTING
+# ========================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ========================================
+# DOCUMENTATION
+# ========================================
+docs/_build/
+site/
+
+# ========================================
+# OTROS
+# ========================================
+*.bak
+*.tmp
+*.temp
+.cache/
+
+# ========================================
+# PERMITIR ARCHIVOS ESPECÍFICOS
+# ========================================
+# Permite .gitkeep en todas las carpetas
+!.gitkeep
+
+# Permite requirements.txt
+!requirements.txt
+
+# Permite README en cualquier carpeta
+!README.md
