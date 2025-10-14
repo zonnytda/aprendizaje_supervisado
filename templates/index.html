@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project_info.nombre }}{% endblock %}
+
+{% block content %}
+
+<!-- Header Principal -->
+<div class="container mt-4 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary mb-3">
+            <i class="fas fa-graduation-cap me-2"></i>
+            Sistema de Predicción de Promedio Final
+        </h1>
+        <p class="lead text-muted">
+            Análisis Predictivo del Rendimiento Académico de Egresados UNE
+        </p>
+    </div>
+</div>
+
+<!-- Información del Autor y Universidad -->
+<div class="container mb-5">
+    <div class="row">
+        <!-- Autor -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Autor del Proyecto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" width="35%"><strong>Nombre:</strong></td>
+                                <td>{{ project_info.autor }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Universidad:</strong></td>
+                                <td>{{ project_info.universidad }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Facultad:</strong></td>
+                                <td>{{ project_info.facultad }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Carrera:</strong></td>
+                                <td>{{ project_info.carrera }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Ubicación:</strong></td>
+                                <td>{{ project_info.ciudad }}, {{ project_info.pais }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Año:</strong></td>
+                                <td>{{ project_info.fecha }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dataset -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-database me-2"></i>
+                        Dataset Analizado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" width="35%"><strong>Origen:</strong></td>
+                                <td>{{ dataset_info.universidad }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Periodo:</strong></td>
+                                <td>{{ dataset_info.periodo }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Registros:</strong></td>
+                                <td><strong>{{ dataset_info.total_registros | format_number(0) }}</strong> egresados</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Variables:</strong></td>
+                                <td>{{ dataset_info.total_variables }} columnas</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Promedio General:</strong></td>
+                                <td><strong class="text-success">{{ dataset_info.promedio_mean | format_decimal(2) }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted"><strong>Desv. Estándar:</strong></td>
+                                <td>{{ dataset_info.promedio_std | format_decimal(2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Descripción del Proyecto -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Descripción del Proyecto
+            </h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-3">
+                {{ project_info.descripcion }}
+            </p>
+            <p class="mb-0">
+                Este sistema implementa técnicas de aprendizaje automático para analizar patrones 
+                en el rendimiento académico de egresados y generar predicciones precisas del promedio 
+                final basándose en características académicas y demográficas de los estudiantes.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Objetivos -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-center">
+        <i class="fas fa-bullseye me-2"></i>
+        Objetivos del Sistema
+    </h4>
+    
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h6 class="card-title">Análisis Exploratorio</h6>
+                    <p class="card-text small text-muted">
+                        Explorar y visualizar las características del dataset de egresados.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-brain fa-3x text-success mb-3"></i>
+                    <h6 class="card-title">Modelado Predictivo</h6>
+                    <p class="card-text small text-muted">
+                        Entrenar modelos de regresión Ridge y Lasso para predicciones.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-balance-scale fa-3x text-warning mb-3"></i>
+                    <h6 class="card-title">Evaluación y Comparación</h6>
+                    <p class="card-text small text-muted">
+                        Comparar métricas de rendimiento entre diferentes modelos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Metodología -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-project-diagram me-2"></i>
+                Metodología
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3 text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-file-csv fa-3x text-primary"></i>
+                    </div>
+                    <h6>1. Carga de Datos</h6>
+                    <p class="small text-muted mb-0">Importación del dataset de egresados</p>
+                </div>
+
+                <div class="col-md-3 mb-3 text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-broom fa-3x text-success"></i>
+                    </div>
+                    <h6>2. Preprocesamiento</h6>
+                    <p class="small text-muted mb-0">Limpieza y transformación de datos</p>
+                </div>
+
+                <div class="col-md-3 mb-3 text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-cogs fa-3x text-warning"></i>
+                    </div>
+                    <h6>3. Entrenamiento</h6>
+                    <p class="small text-muted mb-0">Ajuste de modelos Ridge y Lasso</p>
+                </div>
+
+                <div class="col-md-3 mb-3 text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-chart-bar fa-3x text-danger"></i>
+                    </div>
+                    <h6>4. Evaluación</h6>
+                    <p class="small text-muted mb-0">Análisis de métricas y resultados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tecnologías -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-center">
+        <i class="fas fa-code me-2"></i>
+        Tecnologías Utilizadas
+    </h4>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fab fa-python fa-3x text-primary mb-2"></i>
+                    <p class="mb-0 small"><strong>Python</strong></p>
+                </div>
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fas fa-flask fa-3x text-dark mb-2"></i>
+                    <p class="mb-0 small"><strong>Flask</strong></p>
+                </div>
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fas fa-brain fa-3x text-success mb-2"></i>
+                    <p class="mb-0 small"><strong>Scikit-learn</strong></p>
+                </div>
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fas fa-table fa-3x text-info mb-2"></i>
+                    <p class="mb-0 small"><strong>Pandas</strong></p>
+                </div>
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fas fa-chart-area fa-3x text-danger mb-2"></i>
+                    <p class="mb-0 small"><strong>Matplotlib</strong></p>
+                </div>
+                <div class="col-6 col-md-2 mb-3">
+                    <i class="fab fa-bootstrap fa-3x text-purple mb-2"></i>
+                    <p class="mb-0 small"><strong>Bootstrap</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado del Sistema -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-center">
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Estado del Sistema
+    </h4>
+    
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h2 class="text-primary mb-2">{{ dataset_info.total_registros | format_number(0) }}</h2>
+                    <p class="text-muted mb-0 small">Registros Totales</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h2 class="text-success mb-2">{{ dataset_info.promedio_mean | format_decimal(2) }}</h2>
+                    <p class="text-muted mb-0 small">Promedio General</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h2 class="text-warning mb-2">2</h2>
+                    <p class="text-muted mb-0 small">Modelos Implementados</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm {% if predictor_ready %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-body">
+                    {% if predictor_ready %}
+                    <h2 class="text-success mb-2"><i class="fas fa-check-circle"></i></h2>
+                    <p class="text-muted mb-0 small">Predictor Activo</p>
+                    {% else %}
+                    <h2 class="text-danger mb-2"><i class="fas fa-times-circle"></i></h2>
+                    <p class="text-muted mb-0 small">Predictor Inactivo</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerta si no está entrenado -->
+{% if not predictor_ready %}
+<div class="container mb-5">
+    <div class="alert alert-warning" role="alert">
+        <h5 class="alert-heading">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Sistema de Predicción No Disponible
+        </h5>
+        <p class="mb-3">
+            Los modelos de predicción aún no han sido entrenados. Para utilizar el sistema completo, 
+            es necesario entrenar los modelos primero.
+        </p>
+        <hr>
+        <a href="{{ url_for('train') }}" class="btn btn-warning">
+            <i class="fas fa-robot me-2"></i>
+            Ir a Entrenar Modelos
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.text-purple {
+    color: #6f42c1;
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

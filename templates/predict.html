@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Predicción - Egresados UNE{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-magic"></i> Predicción de Promedio Final
+</h1>
+
+{% if not predictor_ready %}
+<div class="alert alert-warning" role="alert">
+    <h5 class="alert-heading">
+        <i class="fas fa-exclamation-triangle"></i> El predictor no está disponible
+    </h5>
+    <p>El modelo de predicción no está entrenado todavía. Para poder hacer predicciones:</p>
+    <hr>
+    <ol>
+        <li>Ve a la sección <strong>Entrenar</strong></li>
+        <li>Haz clic en <strong>"Entrenar Modelos"</strong></li>
+        <li>Espera a que complete el entrenamiento (5-15 minutos)</li>
+        <li>Regresa aquí para hacer predicciones</li>
+    </ol>
+</div>
+
+<div class="text-center my-5">
+    <a href="{{ url_for('train') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-robot me-2"></i> Ir a Entrenar Modelos
+    </a>
+</div>
+{% else %}
+
+<div class="row">
+    <!-- Formulario de predicción -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-edit"></i> Datos del Estudiante</h5>
+            </div>
+            <div class="card-body">
+                <form id="predictionForm">
+                    <!-- Facultad y Programa -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="facultad" class="form-label">
+                                <i class="fas fa-university"></i> Facultad <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="facultad" name="FACULTAD" required>
+                                <option value="">Seleccione...</option>
+                                {% for fac in options.facultades %}
+                                <option value="{{ fac }}">{{ fac }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="programa" class="form-label">
+                                <i class="fas fa-book"></i> Programa de Estudios <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="programa" name="PROGRAMA_ESTUDIOS" required>
+                                <option value="">Seleccione...</option>
+                                {% for prog in options.programas %}
+                                <option value="{{ prog }}">{{ prog }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Nivel y Sede -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="nivel" class="form-label">
+                                <i class="fas fa-graduation-cap"></i> Nivel Académico <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="nivel" name="NIVEL_ACADEMICO" required>
+                                <option value="">Seleccione...</option>
+                                {% for nivel in options.niveles %}
+                                <option value="{{ nivel }}">{{ nivel }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sede" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Sede <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="sede" name="SEDE" required>
+                                <option value="">Seleccione...</option>
+                                {% for sede in options.sedes %}
+                                <option value="{{ sede }}">{{ sede }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sexo y Tipo de Estudio -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-venus-mars"></i> Sexo <span class="text-danger">*</span>
+                            </label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="SEXO" id="sexoF" value="F" required>
+                                    <label class="form-check-label" for="sexoF">Femenino</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="SEXO" id="sexoM" value="M">
+                                    <label class="form-check-label" for="sexoM">Masculino</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tipoEstudio" class="form-label">
+                                <i class="fas fa-book-reader"></i> Tipo de Estudio <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="tipoEstudio" name="DETALLE_TIPO_ESTUDIO" required>
+                                <option value="">Seleccione...</option>
+                                {% for tipo in options.tipos_estudio %}
+                                <option value="{{ tipo }}">{{ tipo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Créditos Acumulados -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="creditos" class="form-label">
+                                <i class="fas fa-award"></i> Créditos Acumulados: 
+                                <strong><span id="creditosValor" class="text-primary">216</span></strong>
+                            </label>
+                            <input type="range" class="form-range" id="creditos" name="CREDITOS_ACUMULADOS" 
+                                   min="0" max="300" value="216" step="5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">0</small>
+                                <small class="text-muted">300 créditos</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Años -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="annioMatricula" class="form-label">
+                                <i class="fas fa-calendar-plus"></i> Año Primera Matrícula
+                            </label>
+                            <input type="number" class="form-control" id="annioMatricula" name="ANNIO_MATRICULA1" 
+                                   min="2015" max="2024" value="2020" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="annioEgreso" class="form-label">
+                                <i class="fas fa-calendar-check"></i> Año de Egreso
+                            </label>
+                            <input type="number" class="form-control" id="annioEgreso" name="ANNIO_EGRESO" 
+                                   min="2020" max="2025" value="2024" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="annioTramite" class="form-label">
+                                <i class="fas fa-file-alt"></i> Año Solicitud Trámite
+                            </label>
+                            <input type="number" class="form-control" id="annioTramite" name="ANNIO_SOLICITUD_TRAMITE" 
+                                   min="2020" max="2025" value="2024" required>
+                        </div>
+                    </div>
+
+                    <!-- Semestre -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="semestre" class="form-label">
+                                <i class="fas fa-calendar"></i> Semestre de Egreso
+                            </label>
+                            <input type="number" class="form-control" id="semestre" name="SEMESTRE_EGRESO" 
+                                   min="20201" max="20252" value="20241" required>
+                            <small class="text-muted">Formato: AAAAS (ej: 20241 = 2024 - Semestre 1)</small>
+                        </div>
+                    </div>
+
+                    <!-- Botón de predicción -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-magic"></i> Predecir Promedio Final
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4 resultado-card-hidden" id="resultadoCard">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Resultado de la Predicción</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <h1 class="display-2 text-success mb-2" id="prediccionValor">--</h1>
+                    <p class="lead mb-0">Promedio Final Predicho</p>
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-info-circle"></i> Intervalo de Confianza (95%):</strong>
+                    <br>
+                    <h5 class="mb-0 mt-2" id="intervaloConfianza">[-- , --]</h5>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label mb-2">
+                        <strong>Percentil del Promedio</strong>
+                    </label>
+                    <div class="progress custom-progress-height">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated percentil-bar-width" 
+                             role="progressbar" id="percentilBar" 
+                             aria-valuenow="0" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100"
+                             title="Percentil del Promedio">
+                            <strong><span id="percentilTexto">0%</span></strong>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Tu promedio está en el percentil <strong><span id="percentilValor">--</span></strong>
+                    </small>
+                </div>
+
+                <div class="alert alert-light border">
+                    <strong><i class="fas fa-lightbulb"></i> Interpretación:</strong>
+                    <hr>
+                    <p class="mb-0" id="interpretacion">--</p>
+                </div>
+
+                <div class="mt-3 p-2 bg-light rounded">
+                    <small class="text-muted">
+                        <i class="fas fa-robot"></i> Modelo utilizado: 
+                        <strong><span id="modeloUsado">--</span></strong>
+                    </small>
+                </div>
+
+                <button type="button" class="btn btn-outline-primary mt-3 w-100" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> Nueva Predicción
+                </button>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Información</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>¿Cómo funciona?</strong></p>
+                <p class="small text-muted">
+                    El sistema utiliza modelos de Machine Learning (Ridge/Lasso) entrenados
+                    con datos históricos de egresados de la UNE para predecir el promedio final
+                    basándose en las características académicas del estudiante.
+                </p>
+                <hr>
+                <p class="small text-muted mb-0">
+                    <strong>Intervalo de Confianza:</strong> Muestra el rango probable del promedio 
+                    real con un 95% de certeza estadística.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay-content">
+        <div class="spinner-border text-light loading-spinner" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <h4 class="text-white mt-3">
+            <i class="fas fa-brain"></i> Realizando predicción...
+        </h4>
+        <p class="text-white-50">Por favor espera un momento</p>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Actualizar valor del slider de créditos
+document.getElementById('creditos')?.addEventListener('input', function() {
+    document.getElementById('creditosValor').textContent = this.value;
+});
+
+// Manejar envío del formulario
+document.getElementById('predictionForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Validar que todos los campos requeridos estén completos
+    if (!this.checkValidity()) {
+        this.reportValidity();
+        return;
+    }
+    
+    // Mostrar loading
+    document.getElementById('loadingOverlay').style.display = 'block';
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(this);
+    const data = {};
+    
+    formData.forEach((value, key) => {
+        // Convertir a número si es necesario
+        if (['CREDITOS_ACUMULADOS', 'ANNIO_MATRICULA1', 'ANNIO_EGRESO', 'SEMESTRE_EGRESO', 'ANNIO_SOLICITUD_TRAMITE'].includes(key)) {
+            data[key] = parseInt(value);
+        } else {
+            data[key] = value;
+        }
+    });
+    
+    console.log('Datos enviados:', data);
+    
+    try {
+        // Hacer request a la API
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Respuesta recibida:', result);
+        
+        if (result.success) {
+            // Mostrar resultados
+            document.getElementById('prediccionValor').textContent = result.prediction.toFixed(2);
+            document.getElementById('intervaloConfianza').textContent = 
+                `[${result.lower_bound.toFixed(2)}, ${result.upper_bound.toFixed(2)}]`;
+            document.getElementById('percentilValor').textContent = result.percentile.toFixed(1) + '%';
+            document.getElementById('interpretacion').textContent = result.interpretation;
+            document.getElementById('modeloUsado').textContent = result.model_type.toUpperCase();
+            
+            // Actualizar barra de percentil
+            const percentilBar = document.getElementById('percentilBar');
+            const percentilTexto = document.getElementById('percentilTexto');
+            const percentilValue = Math.round(result.percentile);
+            
+            percentilBar.style.width = percentilValue + '%';
+            percentilBar.setAttribute('aria-valuenow', percentilValue);
+            percentilTexto.textContent = percentilValue + '%';
+            
+            // Cambiar color de la barra según el percentil
+            percentilBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+            if (percentilValue >= 70) {
+                percentilBar.classList.add('bg-success');
+            } else if (percentilValue >= 40) {
+                percentilBar.classList.add('bg-warning');
+            } else {
+                percentilBar.classList.add('bg-danger');
+            }
+            
+            // Mostrar card de resultados con animación
+            const resultCard = document.getElementById('resultadoCard');
+            resultCard.style.display = 'block';
+            resultCard.style.opacity = '0';
+            resultCard.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                resultCard.style.transition = 'all 0.5s ease';
+                resultCard.style.opacity = '1';
+                resultCard.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Scroll suave a resultados
+            setTimeout(() => {
+                resultCard.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+            }, 200);
+            
+        } else {
+            alert('❌ Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error en la solicitud:', error);
+        alert('❌ Error al realizar la predicción. Por favor, intenta de nuevo.\n\nDetalles: ' + error.message);
+    } finally {
+        // Ocultar loading
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+});
+
+// Validación en tiempo real
+document.querySelectorAll('select[required], input[required]').forEach(element => {
+    element.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+        }
+    });
+});
+
+// Tooltip para información adicional
+const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+</script>
+{% endblock %}

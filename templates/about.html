@@ -1,0 +1,296 @@
+<!-- Template: about.html -->
+<!-- Proyecto: Egresados UNE -->
+<!-- TODO: Implementar -->
+{% extends "base.html" %}
+
+{% block title %}Acerca de - Egresados UNE{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-info-circle"></i> Acerca del Proyecto
+</h1>
+
+<!-- Descripción del Proyecto -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-project-diagram"></i> Descripción del Proyecto</h5>
+    </div>
+    <div class="card-body">
+        <h6>Predicción de Promedio Final de Egresados UNE</h6>
+        <p class="lead">
+            Sistema de Machine Learning supervisado para predecir el promedio final de egresados
+            de la Universidad Nacional de Educación Enrique Guzmán y Valle (La Cantuta).
+        </p>
+        <p>
+            Este proyecto implementa algoritmos de regresión regularizada (Ridge y Lasso) para
+            analizar y predecir el rendimiento académico de estudiantes egresados, utilizando
+            características demográficas, académicas e institucionales.
+        </p>
+    </div>
+</div>
+
+<!-- Dataset -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-database"></i> Dataset</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Información General</h6>
+                <ul>
+                    <li><strong>Nombre:</strong> {{ dataset_info.nombre }}</li>
+                    <li><strong>Universidad:</strong> {{ dataset_info.universidad }}</li>
+                    <li><strong>Período:</strong> {{ dataset_info.periodo }}</li>
+                    <li><strong>Total de Registros:</strong> {{ dataset_info.total_registros | format_number }}</li>
+                    <li><strong>Total de Variables:</strong> {{ dataset_info.total_variables }}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Variable Objetivo</h6>
+                <ul>
+                    <li><strong>Nombre:</strong> {{ dataset_info.variable_objetivo }}</li>
+                    <li><strong>Tipo:</strong> Numérica continua</li>
+                    <li><strong>Rango:</strong> 12.23 - 19.30</li>
+                    <li><strong>Media:</strong> 15.96 ± 1.15</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h6 class="mt-3">Variables Predictoras (16 features)</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Categóricas:</strong></p>
+                <ul>
+                    <li>FACULTAD (7 categorías)</li>
+                    <li>PROGRAMA_ESTUDIOS (~100 programas)</li>
+                    <li>NIVEL_ACADEMICO (3 niveles)</li>
+                    <li>SEDE (3 sedes)</li>
+                    <li>SEXO (2 categorías)</li>
+                    <li>DETALLE_TIPO_ESTUDIO (9 tipos)</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Numéricas:</strong></p>
+                <ul>
+                    <li>CREDITOS_ACUMULADOS</li>
+                    <li>ANNIO_EGRESO</li>
+                    <li>ANNIO_MATRICULA1</li>
+                    <li>ANNIO_SOLICITUD_TRAMITE</li>
+                    <li>SEMESTRE_EGRESO</li>
+                    <li>+ Features derivadas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Algoritmos -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-robot"></i> Algoritmos de Machine Learning</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-chart-line text-primary"></i> Ridge Regression</h6>
+                <p>
+                    Regresión lineal con regularización L2 que penaliza la magnitud de los coeficientes,
+                    ayudando a prevenir el overfitting.
+                </p>
+                <p><strong>Ventajas:</strong></p>
+                <ul>
+                    <li>Maneja bien la multicolinealidad</li>
+                    <li>Estable y robusto</li>
+                    <li>Buena interpretabilidad</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-chart-line text-danger"></i> Lasso Regression</h6>
+                <p>
+                    Regresión lineal con regularización L1 que puede reducir algunos coeficientes
+                    a cero, realizando selección automática de features.
+                </p>
+                <p><strong>Ventajas:</strong></p>
+                <ul>
+                    <li>Selección automática de features</li>
+                    <li>Genera modelos sparse</li>
+                    <li>Buena para datos de alta dimensionalidad</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="alert alert-info mt-3">
+            <strong><i class="fas fa-lightbulb"></i> ¿Por qué estos algoritmos?</strong>
+            <p class="mb-0">
+                Ridge y Lasso son ideales para este problema porque:
+                <ul>
+                    <li>Manejan bien datasets con muchas features categóricas (one-hot encoding)</li>
+                    <li>Previenen overfitting mediante regularización</li>
+                    <li>Tienen alta interpretabilidad (importante en contexto educativo)</li>
+                    <li>Son computacionalmente eficientes</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Metodología -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-cogs"></i> Metodología</h5>
+    </div>
+    <div class="card-body">
+        <h6>Pipeline de Machine Learning</h6>
+        <ol>
+            <li><strong>Carga de Datos:</strong> Lectura del dataset desde CSV</li>
+            <li><strong>Preprocesamiento:</strong>
+                <ul>
+                    <li>Identificación de tipos de variables</li>
+                    <li>Manejo de valores nulos (estrategia: drop)</li>
+                    <li>Detección y eliminación de outliers (método IQR)</li>
+                    <li>División estratificada train/val/test (70/15/15)</li>
+                </ul>
+            </li>
+            <li><strong>Feature Engineering:</strong>
+                <ul>
+                    <li>Creación de 7 features derivadas</li>
+                    <li>One-Hot Encoding para categóricas</li>
+                    <li>Standard Scaling para numéricas</li>
+                    <li>Agrupación de categorías raras</li>
+                </ul>
+            </li>
+            <li><strong>Entrenamiento:</strong>
+                <ul>
+                    <li>Grid Search para optimización de hiperparámetros</li>
+                    <li>Validación cruzada (k=5)</li>
+                    <li>Entrenamiento de Ridge y Lasso</li>
+                </ul>
+            </li>
+            <li><strong>Evaluación:</strong>
+                <ul>
+                    <li>Métricas: RMSE, MAE, R², MAPE</li>
+                    <li>Análisis de residuales</li>
+                    <li>Learning curves</li>
+                    <li>Feature importance</li>
+                </ul>
+            </li>
+            <li><strong>Comparación:</strong> Selección del mejor modelo</li>
+            <li><strong>Despliegue:</strong> Aplicación web interactiva</li>
+        </ol>
+    </div>
+</div>
+
+<!-- Métricas -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Métricas de Evaluación</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Descripción</th>
+                        <th>Interpretación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>RMSE</strong></td>
+                        <td>Root Mean Squared Error</td>
+                        <td>Error promedio en la misma escala que la variable objetivo. Más bajo es mejor.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MAE</strong></td>
+                        <td>Mean Absolute Error</td>
+                        <td>Error absoluto promedio. Más robusto a outliers que RMSE.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>R²</strong></td>
+                        <td>Coeficiente de Determinación</td>
+                        <td>Proporción de varianza explicada (0-1). Más alto es mejor.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MAPE</strong></td>
+                        <td>Mean Absolute Percentage Error</td>
+                        <td>Error porcentual promedio. Útil para comparar modelos.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Tecnologías -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-code"></i> Tecnologías Utilizadas</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Backend</h6>
+                <ul>
+                    <li><strong>Python 3.8+</strong> - Lenguaje principal</li>
+                    <li><strong>Flask</strong> - Framework web</li>
+                    <li><strong>scikit-learn</strong> - Machine Learning</li>
+                    <li><strong>pandas & numpy</strong> - Manipulación de datos</li>
+                    <li><strong>matplotlib & seaborn</strong> - Visualización</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Frontend</h6>
+                <ul>
+                    <li><strong>HTML5 & CSS3</strong> - Estructura y estilos</li>
+                    <li><strong>Bootstrap 5</strong> - Framework CSS</li>
+                    <li><strong>JavaScript</strong> - Interactividad</li>
+                    <li><strong>Chart.js</strong> - Gráficos interactivos</li>
+                    <li><strong>Font Awesome</strong> - Iconos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Autor -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-user"></i> Información del Autor</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Estudiante:</strong> Ingeniería Estadística e Informática</p>
+        <p><strong>Universidad:</strong> Universidad Nacional de Educación</p>
+        <p><strong>Semestre:</strong> 7mo Semestre</p>
+        <p><strong>Curso:</strong> Machine Learning Supervisado</p>
+        <p><strong>Fecha:</strong> Octubre 2025</p>
+        
+        <div class="alert alert-success mt-3">
+            <strong><i class="fas fa-graduation-cap"></i> Proyecto Académico</strong>
+            <p class="mb-0">
+                Este proyecto fue desarrollado como parte del curso de Machine Learning Supervisado,
+                cumpliendo con todos los requisitos establecidos: implementación de algoritmos de ML,
+                uso de Programación Orientada a Objetos (POO), análisis exploratorio de datos,
+                y aplicación a un problema real con impacto educativo.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Referencias -->
+<div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="fas fa-book"></i> Referencias y Enlaces</h5>
+    </div>
+    <div class="card-body">
+        <ul>
+            <li><a href="https://scikit-learn.org/stable/modules/linear_model.html#ridge-regression" target="_blank" rel="noopener">Ridge Regression - scikit-learn</a></li>
+            <li><a href="https://scikit-learn.org/stable/modules/linear_model.html#lasso" target="_blank" rel="noopener">Lasso Regression - scikit-learn</a></li>
+            <li><a href="https://www.une.edu.pe" target="_blank" rel="noopener">Universidad Nacional de Educación</a></li>
+            <li><a href="https://flask.palletsprojects.com/" target="_blank" rel="noopener">Flask Documentation</a></li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
