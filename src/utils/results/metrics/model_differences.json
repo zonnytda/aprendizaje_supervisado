@@ -6,9 +6,9 @@
   ],
   "differences": {
     "RIDGE_vs_LASSO": {
-      "mean_diff": 0.0004774225117134038,
-      "std_diff": 0.010743793971025992,
-      "max_diff": 0.06855895148535396,
+      "mean_diff": 0.000477422511712295,
+      "std_diff": 0.01074379397102409,
+      "max_diff": 0.06855895148532021,
       "correlation": 0.999928692205578,
       "agreement_within_0_5": 1397,
       "agreement_within_1_0": 1397
